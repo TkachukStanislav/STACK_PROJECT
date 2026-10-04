@@ -1,17 +1,24 @@
 import asyncio
 
-from pydantic import ValidationError                                    # ← нове
+from pydantic import ValidationError
 
-from app.schemas.notification import NotificationMessage                # ← нове
+from app.api.deps import redis_client                         # ← нове
+from app.schemas.notification import NotificationMessage
 from app.services.broker import connect, setup_queues
+from app.services.idempotency import acquire_lock             # ← нове
 
 
 async def handle_message(message):
-    try:                                                                # ← нове
+    try:
         data = NotificationMessage.model_validate_json(message.body)
     except ValidationError:
         print("Зламане повідомлення → DLQ:", message.body)
         await message.reject(requeue=False)
+        return
+
+    if not await acquire_lock(redis_client, data.idempotency_key):
+        print("Дубль, пропускаю:", data.idempotency_key)
+        await message.ack()
         return
 
     print("Отримав нормальне:", data)
