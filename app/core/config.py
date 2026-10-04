@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5432
 
+    RABBITMQ_URL: str = "amqp://guest:guest@localhost:5672/"
     REDIS_URL: str = "redis://localhost:6379/0"
 
     # Вказівка читати файл .env
