@@ -6,7 +6,6 @@ from app.api.deps import redis_client
 from app.schemas.notification import NotificationMessage
 from app.services.broker import connect, setup_queues
 from app.services.idempotency import acquire_lock
-from app.services.rate_limiter import acquire_token
 
 
 async def handle_message(message):
@@ -22,7 +21,6 @@ async def handle_message(message):
         await message.ack()
         return
 
-    await acquire_token()  # чекаємо жетон: не більше 30 відправок на секунду
     print("Отримав нормальне:", data)
     await message.ack()
 
