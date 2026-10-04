@@ -16,3 +16,7 @@ app = FastAPI(title="Notification Dispatcher", lifespan=lifespan)
 
 app.include_router(health.router)
 app.include_router(notifications.router, prefix="/api/v1")
+
+@app.get("/")
+async def root():
+    return {"message": "Notification Dispatcher is running"}
