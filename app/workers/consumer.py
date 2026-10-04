@@ -2,10 +2,11 @@ import asyncio
 
 from pydantic import ValidationError
 
-from app.api.deps import redis_client                         # ← нове
+from app.api.deps import redis_client
 from app.schemas.notification import NotificationMessage
 from app.services.broker import connect, setup_queues
-from app.services.idempotency import acquire_lock             # ← нове
+from app.services.idempotency import acquire_lock
+from app.services.rate_limiter import acquire_token
 
 
 async def handle_message(message):
@@ -21,12 +22,14 @@ async def handle_message(message):
         await message.ack()
         return
 
+    await acquire_token()  # чекаємо жетон: не більше 30 відправок на секунду
     print("Отримав нормальне:", data)
     await message.ack()
 
 
 async def main():
     connection, channel = await connect()
+    await channel.set_qos(prefetch_count=10)  # брати з черги не більше 10 повідомлень одночасно
     await setup_queues(channel)
     queue = await channel.get_queue("notifications.queue")
     await queue.consume(handle_message)
