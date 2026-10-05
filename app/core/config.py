@@ -11,7 +11,6 @@ class Settings(BaseSettings):
 
     RABBITMQ_URL: str = "amqp://guest:guest@localhost:5672/"
     REDIS_URL: str = "redis://localhost:6379/0"
-    TELEGRAM_URL: str = "http://localhost:9000/send"
 
     # Вказівка читати файл .env
     model_config = SettingsConfigDict(
