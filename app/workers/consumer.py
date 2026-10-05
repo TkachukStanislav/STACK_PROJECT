@@ -25,7 +25,9 @@ async def handle_message(message):
 
     async with AsyncSessionLocal() as session:
         notification = await session.get(Notification, data.id)
-        print("Знайшов у базі:", notification.id, notification.status)
+        notification.status = "sent"
+        await session.commit()
+        print("Надіслано, статус оновлено:", notification.id)
     await message.ack()
 
 
