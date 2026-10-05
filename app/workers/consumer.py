@@ -8,6 +8,7 @@ from app.models import Notification
 from app.schemas.notification import NotificationMessage
 from app.services.broker import connect, setup_queues
 from app.services.idempotency import acquire_lock
+from app.services.sender import send_message
 
 
 async def handle_message(message):
@@ -23,11 +24,16 @@ async def handle_message(message):
         await message.ack()
         return
 
+    status_code = await send_message(data.message)  # ← нове: надіслали
+
     async with AsyncSessionLocal() as session:
         notification = await session.get(Notification, data.id)
-        notification.status = "sent"
+        if status_code == 200:  # ← нове
+            notification.status = "sent"
+        else:
+            notification.status = "failed"
         await session.commit()
-        print("Надіслано, статус оновлено:", notification.id)
+        print("Відправка:", notification.id, "→", notification.status)  # ← змінили текст
     await message.ack()
 
 
