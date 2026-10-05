@@ -3,6 +3,8 @@ import asyncio
 from pydantic import ValidationError
 
 from app.api.deps import redis_client
+from app.core.database import AsyncSessionLocal
+from app.models import Notification
 from app.schemas.notification import NotificationMessage
 from app.services.broker import connect, setup_queues
 from app.services.idempotency import acquire_lock
@@ -21,7 +23,9 @@ async def handle_message(message):
         await message.ack()
         return
 
-    print("Отримав нормальне:", data)
+    async with AsyncSessionLocal() as session:
+        notification = await session.get(Notification, data.id)
+        print("Знайшов у базі:", notification.id, notification.status)
     await message.ack()
 
 
