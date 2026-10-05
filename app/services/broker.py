@@ -1,6 +1,6 @@
-import aio_pika
-
 import json
+
+import aio_pika
 
 from app.core.config import settings
 
@@ -32,6 +32,7 @@ async def setup_queues(channel):
         },
     )
     await queue.bind(exchange, routing_key="notifications")
+
 
 async def publish_notification(channel, payload: dict):
     body = json.dumps(payload).encode()

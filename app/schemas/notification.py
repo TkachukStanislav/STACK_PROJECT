@@ -16,6 +16,7 @@ class NotificationResponse(NotificationCreate):
     status: str
     created_at: datetime
 
+
 class NotificationMessage(BaseModel):
     id: int
     recipient_id: int

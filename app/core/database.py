@@ -26,6 +26,7 @@ AsyncSessionLocal = async_sessionmaker(
     autoflush=False,
 )
 
+
 # 3. Базовий клас для всіх моделей
 class Base(DeclarativeBase):
     pass
