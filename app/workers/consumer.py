@@ -1,4 +1,5 @@
 import asyncio
+import random
 
 from pydantic import ValidationError
 
@@ -24,7 +25,17 @@ async def handle_message(message):
         await message.ack()
         return
 
-    status_code = await send_message(data.message)  # ← нове: надіслали
+    for attempt in range(1, 4):  # 3 спроби
+        status_code = await send_message(data.message)
+        print(f"Спроба {attempt}: {status_code}")
+
+        if status_code == 200:  # дійшло → стоп
+            break
+        if status_code is not None and status_code < 500:  # 4xx → повтор не допоможе
+            break
+
+        if attempt < 3:  # пауза: 2 с, потім 4 с
+            await asyncio.sleep(2**attempt + random.uniform(0.1, 0.5))
 
     async with AsyncSessionLocal() as session:
         notification = await session.get(Notification, data.id)
