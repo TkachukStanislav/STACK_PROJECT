@@ -59,7 +59,10 @@ async def main():
     queue = await channel.get_queue("notifications.queue")
     await queue.consume(handle_message)
     print("Воркер слухає чергу... (Ctrl+C, щоб зупинити)")
-    await asyncio.Future()
+    try:
+        await asyncio.Future()
+    finally:
+        await connection.close()  # при зупинці воркера закриваємо з'єднання з RabbitMQ
 
 
 if __name__ == "__main__":
